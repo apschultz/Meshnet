@@ -10,7 +10,7 @@ This (Docker) container provides the official NordVPN client configured for Mesh
 > Note: I've created this container for my personal needs, which is to run Meshnet nodes at different locations to be used as outgoing gateways. If you have another use for this container, feel free to let me know or help add functionality if what you are trying to do doesn't work as expected. 
 
 ## General Meshnet information
-Meshnet is a free self hosted VPN network connecting multiple nodes together. It's functionality, provided with the NordVPN application, is available on most platforms, including Android/Google TV. This could potentially make for an excellent Netflix password sharing workaround and viewing your own country's content when abroad, but obviously I would never recommend to do anything against the rules now would I.
+Meshnet is a free self hosted VPN network connecting multiple nodes together. It's functionality, provided with the NordVPN application, is available on most platforms, including Android/Google TV. The usecases are extensive, the most popular ones are to access local data/network through Meshnet while having remote clients or setting up an exit node to route all client traffic through a single location.
 Read more about Meshnet over here: https://meshnet.nordvpn.com/
 
 ## Installation and configuration
@@ -41,6 +41,7 @@ A `.env` file is supplied with the `docker-compose.yml` file for configuration p
 - `NORDVPN_MESHNET_DEBUG` - Enable debug mode, anything non-empty will ENABLE. Use this if you need more verbose error logging for troubleshooting.
 - `NORDVPN_HEALTHCHECK_INTERVAL` - Set the interval to verify connectivity to the set URL, defaults to 300 (seconds).
 - `NORDVPN_HEALTHCHECK_URL` - An address to verify if connectivity is available. Choose something depending on what connectivity you want to verify, defaults to www.google.com. Please keep in mind, if the healthcheck fails the container will be killed.
+- `NORDVPN_NICKNAME`- Set a nickname for this device/instance on Meshnet, every peer will see and can use this nickname.
 
 #### Meshnet Permissions
 In this version of NordVPN, permissions must be configured directly on the client. NordVPN currently ALLOWS all peers connected to Meshnet by default for Fileshare and Remote access services and DENIES Routing and Local network services. Configuring peer permissions through the NordVPN account website is still in development and not currently available.
