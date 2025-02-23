@@ -1,8 +1,17 @@
 #!/bin/bash
 
+pid=0
+trap "sighandler" INT TERM ABRT
+sighandler() {
+    [ $pid -gt 0 ] && kill -9 $pid
+    exit
+}
+
 # Spin up connection check to verify if Meshnet is running
 while true; do
-  sleep "${NORDVPN_HEALTHCHECK_INTERVAL:-300}"
+  sleep "${NORDVPN_HEALTHCHECK_INTERVAL:-300}" &
+  pid=$!
+  wait $pid
   if [[ ! $(curl -Is -m 30 -o /dev/null -w "%{http_code}" "${NORDVPN_HEALTHCHECK_URL:-www.google.com}") =~ ^[23] ]]; then
     nordvpn status
     s6-svc -wR -t /var/run/s6/services/nordvpn
