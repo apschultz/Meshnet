@@ -7,17 +7,30 @@ sighandler() {
     exit
 }
 
+interval=${NORDVPN_HEALTHCHECK_INTERVAL:-30}
+timeout=${NORDVPN_HEALTHCHECK_TIMEOUT:-5}
+max_failures=${NORDVPN_HEALTHCHECK_FAILURES:-3}
+url=${NORDVPN_HEALTHCHECK_URL:-www.google.com}
+
 # Spin up connection check to verify if Meshnet is running
+errors=0
 while true; do
-  sleep "${NORDVPN_HEALTHCHECK_INTERVAL:-300}" &
+  sleep $interval &
   pid=$!
   wait $pid
-  if [[ ! $(curl -Is -m 30 -o /dev/null -w "%{http_code}" "${NORDVPN_HEALTHCHECK_URL:-www.google.com}") =~ ^[23] ]]; then
-    nordvpn status
-    s6-svc -wR -t /var/run/s6/services/nordvpn
-    # If no connection, stop container
-    echo "Health check address failed to connect, killing container!"
-    exit 1
+  if [[ ! $(curl -Is -m $timeout -o /dev/null -w "%{http_code}" "$url") =~ ^[23] ]]; then
+    errors=$((errors + 1))
+    if [ $errors -ge $max_failures ] ; then
+      nordvpn status
+      s6-svc -wR -t /var/run/s6/services/nordvpn
+      # If no connection, stop container
+      echo "Health check address failed to connect, killing container!"
+      exit 1
+    else
+      echo "Health check address failed to connect $errors times"
+	fi
+  else
+    errors=0
   fi
 done
 
